@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance Calculator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .input-container {
+            position: relative;
+        }
+
+        .input-container i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+            font-size: 1.2rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            margin-top: 40px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-card {
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+
+        .result-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .total-days .stat-icon {
+            color: #667eea;
+        }
+
+        .present-days .stat-icon {
+            color: #2ecc71;
+        }
+
+        .leave-days .stat-icon {
+            color: #f39c12;
+        }
+
+        .absent-days .stat-icon {
+            color: #e74c3c;
+        }
+
+        .attendance-percentage {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .percentage-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: conic-gradient(#667eea 0deg, #667eea var(--percentage), #e1e5e9 var(--percentage), #e1e5e9 360deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+
+        .percentage-inner {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .percentage-label {
+            font-size: 1.2rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .reset-btn {
+            background-color: #e74c3c;
+            margin-top: 20px;
+        }
+
+        .reset-btn:hover {
+            background-color: #c0392b;
+            box-shadow: 0 10px 20px rgba(231, 76, 60, 0.3);
+        }
+
+        .error-message {
+            background-color: #fee;
+            color: #e74c3c;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .error-message.show {
+            display: flex;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-user-graduate"></i> Student Attendance Calculator</h1>
+            <p>Calculate attendance statistics with ease</p>
+        </div>
+        
+        <div class="content">
+            <form id="attendance-form">
+                <div class="form-group">
+                    <label for="total-days">Total Working Days</label>
+                    <div class="input-container">
+                        <i class="fas fa-calendar-alt"></i>
+                        <input type="number" id="total-days" class="form-control" placeholder="Enter total working days" min="1" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="present-days">Days Present</label>
+                    <div class="input-container">
+                        <i class="fas fa-check-circle"></i>
+                        <input type="number" id="present-days" class="form-control" placeholder="Enter days present" min="0" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="leave-days">Days on Leave</label>
+                    <div class="input-container">
+                        <i class="fas fa-file-alt"></i>
+                        <input type="number" id="leave-days" class="form-control" placeholder="Enter days on leave" min="0" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn">
+                    <i class="fas fa-calculator"></i> Calculate Attendance
+                </button>
+            </form>
+            
+            <div class="error-message" id="error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span id="error-text"></span>
+            </div>
+            
+            <div class="results" id="results">
+                <div class="result-card">
+                    <h2 class="result-title">
+                        <i class="fas fa-chart-bar"></i> Attendance Summary
+                    </h2>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-item total-days">
+                            <div class="stat-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div class="stat-value" id="result-total-days">0</div>
+                            <div class="stat-label">Total Days</div>
+                        </div>
+                        
+                        <div class="stat-item present-days">
+                            <div class="stat-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-value" id="result-present-days">0</div>
+                            <div class="stat-label">Present Days</div>
+                        </div>
+                        
+                        <div class="stat-item leave-days">
+                            <div class="stat-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div class="stat-value" id="result-leave-days">0</div>
+                            <div class="stat-label">Leave Days</div>
+                        </div>
+                        
+                        <div class="stat-item absent-days">
+                            <div class="stat-icon">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                            <div class="stat-value" id="result-absent-days">0</div>
+                            <div class="stat-label">Absent Days</div>
+                        </div>
+                    </div>
+                    
+                    <div class="attendance-percentage">
+                        <div class="percentage-circle" id="percentage-circle">
+                            <div class="percentage-inner" id="percentage-value">0%</div>
+                        </div>
+                        <div class="percentage-label">Attendance Percentage</div>
+                    </div>
+                </div>
+                
+                <button class="btn reset-btn" id="reset-btn">
+                    <i class="fas fa-redo"></i> Reset Calculator
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+        const attendanceForm = document.getElementById('attendance-form');
+        const totalDaysInput = document.getElementById('total-days');
+        const presentDaysInput = document.getElementById('present-days');
+        const leaveDaysInput = document.getElementById('leave-days');
+        const resultsSection = document.getElementById('results');
+        const errorMessage = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+        const resetBtn = document.getElementById('reset-btn');
+        
+        // Result elements
+        const resultTotalDays = document.getElementById('result-total-days');
+        const resultPresentDays = document.getElementById('result-present-days');
+        const resultLeaveDays = document.getElementById('result-leave-days');
+        const resultAbsentDays = document.getElementById('result-absent-days');
+        const percentageCircle = document.getElementById('percentage-circle');
+        const percentageValue = document.getElementById('percentage-value');
+        
+        // Event listeners
+        attendanceForm.addEventListener('submit', calculateAttendance);
+        resetBtn.addEventListener('click', resetCalculator);
+        
+        function calculateAttendance(e) {
+            e.preventDefault();
+            
+            // Get input values
+            const totalDays = parseInt(totalDaysInput.value);
+            const presentDays = parseInt(presentDaysInput.value);
+            const leaveDays = parseInt(leaveDaysInput.value);
+            
+            // Validate inputs
+            if (isNaN(totalDays) || isNaN(presentDays) || isNaN(leaveDays)) {
+                showError('Please enter valid numbers for all fields');
+                return;
+            }
+            
+            if (totalDays <= 0) {
+                showError('Total days must be greater than 0');
+                return;
+            }
+            
+            if (presentDays < 0 || leaveDays < 0) {
+                showError('Present days and leave days cannot be negative');
+                return;
+            }
+            
+            if (presentDays + leaveDays > totalDays) {
+                showError('Sum of present and leave days cannot exceed total days');
+                return;
+            }
+            
+            // Calculate absent days
+            const absentDays = totalDays - presentDays - leaveDays;
+            
+            // Calculate attendance percentage
+            const attendancePercentage = Math.round((presentDays / totalDays) * 100);
+            
+            // Update results
+            resultTotalDays.textContent = totalDays;
+            resultPresentDays.textContent = presentDays;
+            resultLeaveDays.textContent = leaveDays;
+            resultAbsentDays.textContent = absentDays;
+            
+            // Update percentage circle
+            const percentageDeg = (attendancePercentage / 100) * 360;
+            percentageCircle.style.setProperty('--percentage', `${percentageDeg}deg`);
+            percentageValue.textContent = `${attendancePercentage}%`;
+            
+            // Show results
+            hideError();
+            resultsSection.classList.add('show');
+            
+            // Scroll to results
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        function resetCalculator() {
+            attendanceForm.reset();
+            resultsSection.classList.remove('show');
+            hideError();
+        }
+        
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.add('show');
+        }
+        
+        function hideError() {
+            errorMessage.classList.remove('show');
+        }
+        
+        // Add input validation
+        [totalDaysInput, presentDaysInput, leaveDaysInput].forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.value < 0) {
+                    this.value = 0;
+                }
+            });
+        });
+        
+        // Ensure present days don't exceed total days
+        presentDaysInput.addEventListener('input', function() {
+            const totalDays = parseInt(totalDaysInput.value) || 0;
+            if (parseInt(this.value) > totalDays) {
+                this.value = totalDays;
+            }
+        });
+        
+        // Ensure leave days don't exceed total days
+        leaveDaysInput.addEventListener('input', function() {
+            const totalDays = parseInt(totalDaysInput.value) || 0;
+            if (parseInt(this.value) > totalDays) {
+                this.value = totalDays;
+            }
+        });
+    </script>
+</body>
+</html>
